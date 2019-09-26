@@ -1,0 +1,11 @@
+---
+# vars file for nodejs
+#
+repo_id: elastic.repo
+install_nodejs_dir: /usr/local/lib/nodejs
+clone_project_dir: /data
+clone_project_path: /data/psearch
+document_root_dir: /data/www/html
+httpd_cfg_path: /etc/httpd/conf.d/nodejs.conf
+daily_task_script_path: /root/testscript.sh
+run_script_path: /root/test.js

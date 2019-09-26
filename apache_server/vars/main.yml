@@ -1,0 +1,5 @@
+---
+# vars file for apache_server
+#
+docroot_dir: /var/www
+documentroot_dir: /var/www

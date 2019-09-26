@@ -1,0 +1,104 @@
+---
+- include: prerequisites.yml
+- name: making repo for elasticsearch
+  template:
+          src: "{{ repo_id }}"
+          dest: "/etc/yum.repos.d/{{ repo_id }}"
+- name: installing elastic search
+  yum:
+        name:
+              - elasticsearch
+              - git
+              - httpd
+              - java
+              - tar
+        state: present
+- name: installing nodejs
+  file:
+         name: "{{ install_nodejs_dir }}"
+         state: directory
+- unarchive:
+                src: "https://nodejs.org/dist/v10.15.1/node-v10.15.1-linux-x64.tar.gz"
+                dest: "{{ install_nodejs_dir }}"
+                remote_src: yes
+  tags:
+          - unarchive
+- file:
+       src: "{{ install_nodejs_dir }}/node-v10.15.1-linux-x64/bin/node"
+       dest: /usr/bin/node
+       state: link
+
+- file:
+       src: "{{ install_nodejs_dir }}/node-v10.15.1-linux-x64/bin/npm"
+       dest: /usr/bin/npm
+       state: link
+
+- file:
+       src: "{{ install_nodejs_dir }}/node-v10.15.1-linux-x64/bin/npx"
+       dest: /usr/bin/npx
+       state: link
+- name: starting service for elasticsearch
+  service:
+          name: elasticsearch
+          state: started
+          enabled: yes
+- name: dir to clone project
+  file:
+          name: "{{ clone_project_dir }}"
+          state: directory
+- name: getting the project psearch
+  git:
+          repo: https://github.com/nodejs/nodejs.org.git
+          dest: "{{ clone_project_path }}"
+  tags:
+          - git
+- name: making the document root directory
+  file:
+          name: "{{ document_root_dir }}"
+          state: directory
+- name: making document root
+  blockinfile:
+          path: "{{ httpd_cfg_path }}"
+          block: |
+                  DocumentRoot {{ document_root_dir }}
+                  <Directory "{{ document_root_dir }}">
+                          Require all granted
+                  </Directory>
+          create: yes
+- name: start service for http
+  service:
+          name: httpd
+          state: reloaded
+- name: Linking the psearch data
+  file:
+          src: /data/psearch
+          dest: "{{ document_root_dir }}"
+          state: link
+          force: yes
+- name: installing daemonize-process
+  npm:
+          name: daemonize-process
+          path: /data/psearch
+          state: present
+- name: start npm
+  shell: nohup /root/npm.sh  
+  args:
+         chdir: /data/psearch
+  tags:
+  - "npm"
+- name: run scripts daily
+  cron:
+          name: "run scripts"
+          minute: "0"
+          hour: "0"
+          job: "{{ daily_task_script_path }}"
+- name: 
+  shell: "{{ run_script_path }}"
+- name: addind firewall
+  firewalld:
+          port: 8080/tcp
+          state: enabled
+          immediate: yes
+          permanent: yes
+  tags:
+          - firewall

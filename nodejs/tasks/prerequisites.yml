@@ -1,0 +1,9 @@
+- name: making demo scripts to run task
+  template:
+          src: test.js.j2
+          dest: /root/test.js
+          mode: 0755
+- template:
+        src: testscript.sh.j2
+        dest: /root/testscript.sh
+        mode: 0755

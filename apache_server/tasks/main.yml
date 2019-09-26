@@ -1,0 +1,44 @@
+---
+# tasks file for apache_server
+#
+- name: install apache web server for RedHat
+  yum:
+          name: httpd
+          state: present
+  when: ansible_distribution == "RedHat"
+- name: install apache web server for Ubantu
+  apt:
+          name: apache2
+          state: present
+  when: ansible_distribution == "Ubuntu"
+- name: configuring the file on ubantu
+  template:
+          src: apache.conf.j2
+          dest: /etc/apache2/conf-enabled/apache.conf
+  when: ansible_distribution == "Ubuntu"
+  notify:
+          - reload apache2
+- name: configuring httpd on RedHat
+  template:
+          src: web.conf.j2
+          dest: /etc/httpd/conf.d/web.conf
+  when: ansible_distribution == "RedHat"
+  notify:
+          - restart httpd
+- name: adding firewall rule
+  firewalld:
+          port: 80/tcp
+          state: enabled
+          permanent: yes
+          immediate: yes
+  when: ansible_distribution == "RedHat"
+- name: Allow port 80 for web server
+  ufw:
+          rule: allow
+          port: "80"
+          proto: tcp
+  when: ansible_distribution == "Ubuntu"
+- name: web page 
+  template:
+          src: index.html.j2
+          dest: /var/www/index.html

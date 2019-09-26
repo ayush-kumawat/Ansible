@@ -1,0 +1,11 @@
+---
+# handlers file for apache_server
+#
+- name: restart httpd
+  service:
+          name: httpd
+          state: reloaded
+- name: reload apache2
+  service:
+          name: apache2
+          state: reloaded

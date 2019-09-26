@@ -1,0 +1,6 @@
+[lb]
+192.168.56.9 ansible_user=root  ansible_password=redhat
+
+[web]
+192.168.56.3 ansible_user=root  ansible_password=redhat
+192.168.56.8 ansible_user=root  ansible_password=redhat
